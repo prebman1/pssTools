@@ -1,13 +1,15 @@
 
-#' Title
+#' String Split 1
 #'
-#' @param x
-#' @param split
+#' @param x A character vector with one element.
+#' @param split What to split on.
 #'
-#' @return
+#' @return A character vector.
 #' @export
 #'
 #' @examples
+#' x <- "alfa,bravo,charlie,delta"
+#' strsplit(x, split = ",")
 strsplit1 <- function(x, split) {
   strsplit(x, split = split)[[1]]
 }
