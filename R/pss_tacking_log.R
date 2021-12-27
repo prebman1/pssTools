@@ -10,6 +10,8 @@
 #' tracking_log <- pss_tracking_log(cases)
 #'
 pss_tracking_log <- function(cases) {
+  redcap_events <- c("initial_contact_fo_arm_1", "consent_arm_1", "baseline_arm_1","baseline_idi_consent_arm_1", "baseline_idi_arm_1","baseline_idi_child_consent_arm_1", "baseline_idi_child_arm_1", "wave2_arm_1", "followup_idi_arm_1","followup_idi_child_arm_1", "wave3_arm_1", "wave4_arm_1")
+
   ############# Clean Data #############
   #define variables for sets of REDCap variables that we need for the case list
   cases_info_vars <- c("record_id", "redcap_event_name", "iden_date_mdy", "contact_dob", "contact_currentage", "eligible", "role_final", "school_comb", "besttimetoreach___1", "besttimetoreach___2", "besttimetoreach___3", "besttimetoreach___4", "besttimetoreach___5","randomization_child_num", "pot_participant_status", "pot_participant_status_idi","pot_participant_status_child", "exitstatus", "idi_selected", "randomization_child_age", "followup_break___0", "followup_break___1", "followup_break___2", "followup_break___3", "followup_break___4", "followup_break___5", "followup_break___6", "followup_break___7", "followup_break___8", "followup_break___9", "followup_break___10", "followup_break___11")
