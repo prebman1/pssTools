@@ -9,7 +9,7 @@
 #' cases <- redcap_read(redcap_uri = url, "token"=token, events = redcap_events)$data
 #' tracking_log <- pss_tracking_log(cases)
 #' case_list <- pss_case_list(tracking_log)
-pss_case_list <- function(tracking_log){
+pss_case_list <- function(tracking_log, report_date){
   ##### Construct Case List #####
   case_list <- tracking_log
 
