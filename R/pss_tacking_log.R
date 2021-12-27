@@ -9,7 +9,7 @@
 #' cases <- redcap_read(redcap_uri = url, "token"=token, events = redcap_events)$data
 #' tracking_log <- pss_tracking_log(cases)
 #'
-pss_tracking_log <- function(cases) {
+pss_tracking_log <- function(cases, week_start_day) {
   redcap_events <- c("initial_contact_fo_arm_1", "consent_arm_1", "baseline_arm_1","baseline_idi_consent_arm_1", "baseline_idi_arm_1","baseline_idi_child_consent_arm_1", "baseline_idi_child_arm_1", "wave2_arm_1", "followup_idi_arm_1","followup_idi_child_arm_1", "wave3_arm_1", "wave4_arm_1")
 
   ############# Clean Data #############
