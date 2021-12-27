@@ -10,6 +10,6 @@
 #' @examples
 #' x <- "alfa,bravo,charlie,delta"
 #' strsplit(x, split = ",")
-strsplit1 <- function(x, split) {
+str_split_one <- function(x, split) {
   strsplit(x, split = split)[[1]]
 }
