@@ -401,7 +401,7 @@ pss_tracking_log <- function(cases) {
                                                                                      "Just enough to make ends meet",
                                                                                      "Almost enough to make ends meet",
                                                                                      "Not enough to make ends meet"))
-  label(tracking_log$money) <- "At the end of each month did your household end up with:"
+  label(tracking_log$money) <- "At end of month, household ended up with:"
   label(tracking_log$randomization_child_age) <- "Index Child's Age"
 
   return(tracking_log)
