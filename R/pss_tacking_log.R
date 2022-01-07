@@ -178,8 +178,9 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
         redcap_event_name == 'baseline_idi_child_consent' ~ baseline_date,
         redcap_event_name == 'baseline_idi_child' ~ baseline_date,
         redcap_event_name == 'wave2' ~ baseline_date + 365*.5,
-        redcap_event_name == 'followup_idi' ~ baseline_date + 365*.5,
-        redcap_event_name == 'followup_idi_child' ~ baseline_date + 365*.5,
+        redcap_event_name == 'wave2' ~ baseline_date + 365*.5,
+        redcap_event_name == 'followup_idi' & role_final == "Parent/Caregiver" ~ baseline_date + 365*.5,
+        redcap_event_name == 'followup_idi_child' & role_final == "Teacher/Staff" ~ baseline_date + 365*.25,
         redcap_event_name == 'wave3' ~ baseline_date + 365,
         redcap_event_name == 'wave4' ~ baseline_date + 365 *1.5
       ),
