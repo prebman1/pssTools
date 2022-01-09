@@ -4,7 +4,7 @@
 \alias{pss_tracking_log}
 \title{Create PSS Tracking Log From REDCap Data}
 \usage{
-pss_tracking_log(cases)
+pss_tracking_log(cases, week_start_day = 5)
 }
 \arguments{
 \item{cases}{A data frame with output from redcap_read function for PSS}

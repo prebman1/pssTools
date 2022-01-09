@@ -2,5 +2,6 @@
 
 export(pss_case_list)
 export(pss_draw_consort)
+export(pss_qc)
 export(pss_tracking_log)
 export(str_split_one)

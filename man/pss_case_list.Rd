@@ -4,7 +4,7 @@
 \alias{pss_case_list}
 \title{Create Project SafeSchools Case List from Tracking Log}
 \usage{
-pss_case_list(tracking_log)
+pss_case_list(tracking_log, report_date = Sys.Date())
 }
 \arguments{
 \item{tracking_log}{A data frame created from the pss_tracking_log function.}
