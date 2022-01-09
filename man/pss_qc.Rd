@@ -4,7 +4,7 @@
 \alias{pss_qc}
 \title{Create QC List}
 \usage{
-pss_qc(cases, logs, data_dictionary)
+pss_qc(cases, logs, data_dictionary, qc_rules)
 }
 \arguments{
 \item{cases}{A data frame with output from redcap_read function for PSS.}
@@ -12,6 +12,8 @@ pss_qc(cases, logs, data_dictionary)
 \item{logs}{A data frame with all logging events from REDCap.}
 
 \item{data_dictionary}{A data frame with the current data dictionary to look for missingness.}
+
+\item{qc_rules}{A data frame with the project specific qc_rules.}
 }
 \value{
 A cleaned data frame of current QC Issues.

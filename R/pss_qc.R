@@ -3,6 +3,7 @@
 #' @param cases A data frame with output from redcap_read function for PSS.
 #' @param logs A data frame with all logging events from REDCap.
 #' @param data_dictionary A data frame with the current data dictionary to look for missingness.
+#' @param qc_rules A data frame with the project specific qc_rules.
 #'
 #' @return A cleaned data frame of current QC Issues.
 #' @export
@@ -10,7 +11,7 @@
 #' @examples
 #' cases <- redcap_read(redcap_uri = url, "token"=token, events = redcap_events)$data
 #' qc <- pss_qc(cases)
-pss_qc <- function(cases, logs, data_dictionary) {
+pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
   #clean data_dictionary file
   data_dictionary <- data_dictionary[,c(1,2,4,12,18)]
   data_dictionary <- data_dictionary[-c(which(data_dictionary$Variable...Field.Name == "survey_admin_notes")),]
@@ -285,7 +286,6 @@ pss_qc <- function(cases, logs, data_dictionary) {
   }
 
   ############################### Specific Validation Rules #############################
-  qc_rules <- read.csv("safeschools_qc_rules_20210923.csv", stringsAsFactors = FALSE)
 
   for(i in 1:nrow(qc_rules)){
     curr_qc_check <- qc_cases %>% filter(redcap_event_name == qc_rules$event[i])
