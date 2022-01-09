@@ -11,4 +11,6 @@ RoxygenNote: 7.1.2
 Imports: 
     dplyr,
     lubridate,
+    pryr,
+    rlang,
     stringr
