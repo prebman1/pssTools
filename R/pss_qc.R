@@ -4,6 +4,7 @@
 #' @param logs A data frame with all logging events from REDCap.
 #' @param data_dictionary A data frame with the current data dictionary to look for missingness.
 #' @param qc_rules A data frame with the project specific qc_rules.
+#' @param write_files Logical. Determines if csv files and Rmd files are created or not.
 #'
 #' @return A cleaned data frame of current QC Issues.
 #' @export
@@ -11,7 +12,7 @@
 #' @examples
 #' cases <- redcap_read(redcap_uri = url, "token"=token, events = redcap_events)$data
 #' qc <- pss_qc(cases)
-pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
+pss_qc <- function(cases, logs, data_dictionary, qc_rules, write_files = FALSE) {
   #clean data_dictionary file
   data_dictionary <- data_dictionary[,c(1,2,4,12,18)]
   data_dictionary <- data_dictionary[-c(which(data_dictionary$Variable...Field.Name == "survey_admin_notes")),]
@@ -211,8 +212,9 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
   missingness$perc_miss[which(missingness$num_expected != 0)] <- missingness$num_missing[which(missingness$num_expected != 0)] / missingness$num_expected[which(missingness$num_expected != 0)]
   missingness$perc_miss[which(is.na(missingness$perc_miss))] <- 0
 
-  write.csv(missingness, file = paste0("Missingness ", format(Sys.Date(), '%Y%m%d'), ".csv"))
-
+  if(write_files == TRUE){
+    write.csv(missingness, file = paste0("Missingness ", format(Sys.Date(), '%Y%m%d'), ".csv"))
+  }
   #missingness <- missingness[which(missingness$perc_miss > .05),]
 
 
@@ -263,8 +265,9 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
   participant_missingness_long <- participant_missingness_long[which(participant_missingness_long$perc_miss > .05),]
 
   output_time <- format(Sys.time(), '%Y%m%d %I%M')
-  rmarkdown::render("Missingness.Rmd", output_file = paste0("Missingness - ", output_time))
-
+  if(write_files == TRUE){
+    rmarkdown::render("Missingness.Rmd", output_file = paste0("Missingness - ", output_time))
+  }
 
   ##### Missing data for select initial_contact_fo vars
   initial_cont_miss_vars <- c("iden_date_mdy", "contact_dob", "reg_phone", "teacher_school_location",
