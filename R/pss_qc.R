@@ -285,19 +285,19 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
     }
   }
 
-  ############################### Specific Validation Rules #############################
-
-  for(i in 1:nrow(qc_rules)){
-    curr_qc_check <- qc_cases %>% filter(redcap_event_name == qc_rules$event[i])
-
-    for(r in 1:nrow(curr_qc_check)){
-      qc_condition <- eval(rlang::parse_expr(qc_rules$r_rule[i]))
-      if(qc_condition %in% TRUE) {
-        qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), curr_qc_check$record_id[r], curr_qc_check$redcap_event_name[r], qc_rules$form[i], qc_rules$variables[i], qc_rules$description[i], "New")
-      }
-    }
-
-  }
+  # ############################### Specific Validation Rules #############################
+  #
+  # for(i in 1:nrow(qc_rules)){
+  #   curr_qc_check <- qc_cases %>% filter(redcap_event_name == qc_rules$event[i])
+  #
+  #   for(r in 1:nrow(curr_qc_check)){
+  #     qc_condition <- eval(rlang::parse_expr(qc_rules$r_rule[i]))
+  #     if(qc_condition %in% TRUE) {
+  #       qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), curr_qc_check$record_id[r], curr_qc_check$redcap_event_name[r], qc_rules$form[i], qc_rules$variables[i], qc_rules$description[i], "New")
+  #     }
+  #   }
+  #
+  # }
 
 
   # ############################### Field History Checks ###############################
