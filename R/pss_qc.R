@@ -5,6 +5,7 @@
 #' @param data_dictionary A data frame with the current data dictionary to look for missingness.
 #' @param qc_rules A data frame with the project specific qc_rules.
 #' @param write_files Logical. Determines if csv files and Rmd files are created or not.
+#' @param form_mapping A data frame that has all the form mapping done.
 #'
 #' @return A cleaned data frame of current QC Issues.
 #' @export
@@ -12,7 +13,7 @@
 #' @examples
 #' cases <- redcap_read(redcap_uri = url, "token"=token, events = redcap_events)$data
 #' qc <- pss_qc(cases)
-pss_qc <- function(cases, logs, data_dictionary, qc_rules, write_files = FALSE) {
+pss_qc <- function(cases, logs, data_dictionary, qc_rules, form_mapping, write_files = FALSE) {
   #clean data_dictionary file
   data_dictionary <- data_dictionary[,c(1,2,4,12,18)]
   data_dictionary <- data_dictionary[-c(which(data_dictionary$Variable...Field.Name == "survey_admin_notes")),]
@@ -158,7 +159,6 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules, write_files = FALSE) 
   fields_not_to_check <- c()
   forms_complete_vars <- paste0(forms, "_complete")
 
-  form_mapping <- read.csv("instrument_mapping_20211105.csv", stringsAsFactors = FALSE)
   form_mapping$unique_event_name <- gsub("_arm_1", "", form_mapping$unique_event_name)
 
   #manually adjust form mapping b/c we've conceptually split parent and child idi's, even though they are the same event in REDCap
