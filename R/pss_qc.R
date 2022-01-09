@@ -11,6 +11,13 @@
 #' cases <- redcap_read(redcap_uri = url, "token"=token, events = redcap_events)$data
 #' qc <- pss_qc(cases)
 pss_qc <- function(cases, logs, data_dictionary) {
+  #clean data_dictionary file
+  data_dictionary <- data_dictionary[,c(1,2,4,12,18)]
+  data_dictionary <- data_dictionary[-c(which(data_dictionary$Variable...Field.Name == "survey_admin_notes")),]
+  colnames(data_dictionary) <- c("var", "form", "field_type", "branching", "annotation")
+  #manually fix data dictionary form for idi_tracking so you can examine missingness for adult and child idi separately
+  data_dictionary$form[data_dictionary$form == "idi_tracking" & grepl("child", data_dictionary$var)] <- "idi_tracking_child"
+
   #################################### Clean REDCap Data #########################################
   #create new df to maintain cases (original REDCap data) if needed later
   qc_cases <- cases
