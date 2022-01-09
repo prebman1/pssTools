@@ -275,15 +275,15 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
                               "age_child4", "name_child5", "age_child5", "name_child6", "age_child6")
   form_completed <- qc_cases %>% filter(redcap_event_name == "initial_contact_fo" & (!is.na(caregiver) | !is.na(school_employee) | !is.na(adult)))
   initial_cont_data_dict <- data_dictionary %>% filter(var %in% initial_cont_miss_vars)
-  # for(i in initial_cont_miss_vars) {
-  #   for(r in 1:nrow(form_completed)) {
-  #     is_missing <- is.na(form_completed[,which(colnames(form_completed) == i)])[r]
-  #     branching_logic_true <- ifelse(i %in% branching$var, eval(rlang::parse_expr(branching[which(branching$var == i),"branching_r"])), TRUE)
-  #     if(is_missing & branching_logic_true) { #if the variable is missing and branching logic is true
-  #       qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), form_completed$record_id[r], 1, "Initial Contact Form", i, "Missing Data", "New")
-  #     }
-  #   }
-  # }
+  for(i in initial_cont_miss_vars) {
+    for(r in 1:nrow(form_completed)) {
+      is_missing <- is.na(form_completed[,which(colnames(form_completed) == i)])[r]
+      branching_logic_true <- ifelse(i %in% branching$var, eval(rlang::parse_expr(branching[which(branching$var == i),"branching_r"])), TRUE)
+      if(is_missing & branching_logic_true) { #if the variable is missing and branching logic is true
+        qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), form_completed$record_id[r], 1, "Initial Contact Form", i, "Missing Data", "New")
+      }
+    }
+  }
 #
 #   ############################### Specific Validation Rules #############################
 #
