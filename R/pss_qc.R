@@ -312,7 +312,7 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
 
   list_to_remove <- c()
   for(i in 1:nrow(idi_selected_issues)){
-    #remove_cond <- (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$idi_selected_value[i] == "idi_selected = ''") | (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$Username[i] %in% c("prebman1@jh.edu", "aingall4@jh.edu"))
+    #remove_cond <- (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$idi_selected_value[i] == "idi_selected = ''") | (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$username[i] %in% c("prebman1@jh.edu", "aingall4@jh.edu"))
     remove_cond <- (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$idi_selected_value[i] == "idi_selected = ''")
     if(is.na(remove_cond)) {remove_cond <- FALSE}
     if(remove_cond){
@@ -320,8 +320,8 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
     }
   }
   idi_selected_issues <- idi_selected_issues[-list_to_remove,]
-  idi_selected_issues <- idi_selected_issues[which(idi_selected_issues$Username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
-  idi_selected_issues <- idi_selected_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "idi_selected", description = paste0(Username, " set ", idi_selected_value, " on ", timestamp), status = "New") %>%
+  idi_selected_issues <- idi_selected_issues[which(idi_selected_issues$username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
+  idi_selected_issues <- idi_selected_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "idi_selected", description = paste0(username, " set ", idi_selected_value, " on ", timestamp), status = "New") %>%
     select(date, record_id, event, form, variables, description, status)
 
   qc_errors <- rbind(qc_errors, idi_selected_issues)
@@ -335,7 +335,7 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
 
   list_to_remove <- c()
   for(i in 1:nrow(rand_override_issues)){
-    #remove_cond <- (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$rand_override_value[i] == "idi_selected = ''") | (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$Username[i] %in% c("prebman1@jh.edu", "aingall4@jh.edu"))
+    #remove_cond <- (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$rand_override_value[i] == "idi_selected = ''") | (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$username[i] %in% c("prebman1@jh.edu", "aingall4@jh.edu"))
     remove_cond <- (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$rand_override_value[i] == "randomization_override = ''")
     if(is.na(remove_cond)) {remove_cond <- FALSE}
     if(remove_cond){
@@ -343,8 +343,8 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
     }
   }
   if(!is.null(list_to_remove)) rand_override_issues <- rand_override_issues[-list_to_remove,]
-  rand_override_issues <- rand_override_issues[which(rand_override_issues$Username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
-  rand_override_issues <- rand_override_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "randomization_override", description = paste0(Username, " set ", rand_override_value, " on ", timestamp), status = "New") %>%
+  rand_override_issues <- rand_override_issues[which(rand_override_issues$username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
+  rand_override_issues <- rand_override_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "randomization_override", description = paste0(username, " set ", rand_override_value, " on ", timestamp), status = "New") %>%
     select(date, record_id, event, form, variables, description, status)
 
   qc_errors <- rbind(qc_errors, rand_override_issues)
