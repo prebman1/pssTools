@@ -305,7 +305,7 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
 
   #selected for idi field
   idi_selected_issues <- logs[which(grepl("idi_selected =", logs$details)),]
-  idi_selected_issues$record_id <- str_extract(idi_selected_issues$Action, "\\d{4}-\\d*")
+  idi_selected_issues$record_id <- str_extract(idi_selected_issues$action, "\\d{4}-\\d*")
   idi_selected_issues$idi_selected_value <- str_extract(idi_selected_issues$details, "idi_selected = '[01]*'")
   idi_selected_issues <- idi_selected_issues %>% arrange(record_id, timestamp)
   idi_selected_issues <- idi_selected_issues %>% mutate(prev_record_id = lag(record_id))
@@ -328,7 +328,7 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
 
   #randomization override field
   rand_override_issues <- logs[which(grepl("randomization_override =", logs$details)),]
-  rand_override_issues$record_id <- str_extract(rand_override_issues$Action, "\\d{4}-\\d*")
+  rand_override_issues$record_id <- str_extract(rand_override_issues$action, "\\d{4}-\\d*")
   rand_override_issues$rand_override_value <- str_extract(rand_override_issues$details, "randomization_override = '[01]*'")
   rand_override_issues <- rand_override_issues %>% arrange(record_id, timestamp)
   rand_override_issues <- rand_override_issues %>% mutate(prev_record_id = lag(record_id))
