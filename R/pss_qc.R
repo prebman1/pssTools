@@ -14,6 +14,9 @@
 #' cases <- redcap_read(redcap_uri = url, "token"=token, events = redcap_events)$data
 #' qc <- pss_qc(cases)
 pss_qc <- function(cases, logs, data_dictionary, qc_rules, form_mapping, write_files = FALSE) {
+  #remove seconds from log timestamp
+  logs$timestamp <- format(logs$timestamp, "%Y-%m-%d %H:%M")
+
   #clean data_dictionary file
   data_dictionary <- data_dictionary[,c(1,2,4,12,18)]
   data_dictionary <- data_dictionary[-c(which(data_dictionary$Variable...Field.Name == "survey_admin_notes")),]
