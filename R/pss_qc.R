@@ -304,10 +304,10 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
   #checks to ensure specific fields have only been modified by specific people
 
   #selected for idi field
-  idi_selected_issues <- logs[which(grepl("idi_selected =", logs$List.of.Data.Changes.OR.Fields.Exported)),]
+  idi_selected_issues <- logs[which(grepl("idi_selected =", logs$details)),]
   idi_selected_issues$record_id <- str_extract(idi_selected_issues$Action, "\\d{4}-\\d*")
-  idi_selected_issues$idi_selected_value <- str_extract(idi_selected_issues$List.of.Data.Changes.OR.Fields.Exported, "idi_selected = '[01]*'")
-  idi_selected_issues <- idi_selected_issues %>% arrange(record_id, Time...Date)
+  idi_selected_issues$idi_selected_value <- str_extract(idi_selected_issues$details, "idi_selected = '[01]*'")
+  idi_selected_issues <- idi_selected_issues %>% arrange(record_id, timestamp)
   idi_selected_issues <- idi_selected_issues %>% mutate(prev_record_id = lag(record_id))
 
   list_to_remove <- c()
@@ -321,16 +321,16 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
   }
   idi_selected_issues <- idi_selected_issues[-list_to_remove,]
   idi_selected_issues <- idi_selected_issues[which(idi_selected_issues$Username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
-  idi_selected_issues <- idi_selected_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "idi_selected", description = paste0(Username, " set ", idi_selected_value, " on ", Time...Date), status = "New") %>%
+  idi_selected_issues <- idi_selected_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "idi_selected", description = paste0(Username, " set ", idi_selected_value, " on ", timestamp), status = "New") %>%
     select(date, record_id, event, form, variables, description, status)
 
   qc_errors <- rbind(qc_errors, idi_selected_issues)
 
   #randomization override field
-  rand_override_issues <- logs[which(grepl("randomization_override =", logs$List.of.Data.Changes.OR.Fields.Exported)),]
+  rand_override_issues <- logs[which(grepl("randomization_override =", logs$details)),]
   rand_override_issues$record_id <- str_extract(rand_override_issues$Action, "\\d{4}-\\d*")
-  rand_override_issues$rand_override_value <- str_extract(rand_override_issues$List.of.Data.Changes.OR.Fields.Exported, "randomization_override = '[01]*'")
-  rand_override_issues <- rand_override_issues %>% arrange(record_id, Time...Date)
+  rand_override_issues$rand_override_value <- str_extract(rand_override_issues$details, "randomization_override = '[01]*'")
+  rand_override_issues <- rand_override_issues %>% arrange(record_id, timestamp)
   rand_override_issues <- rand_override_issues %>% mutate(prev_record_id = lag(record_id))
 
   list_to_remove <- c()
@@ -344,7 +344,7 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
   }
   if(!is.null(list_to_remove)) rand_override_issues <- rand_override_issues[-list_to_remove,]
   rand_override_issues <- rand_override_issues[which(rand_override_issues$Username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
-  rand_override_issues <- rand_override_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "randomization_override", description = paste0(Username, " set ", rand_override_value, " on ", Time...Date), status = "New") %>%
+  rand_override_issues <- rand_override_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "randomization_override", description = paste0(Username, " set ", rand_override_value, " on ", timestamp), status = "New") %>%
     select(date, record_id, event, form, variables, description, status)
 
   qc_errors <- rbind(qc_errors, rand_override_issues)
