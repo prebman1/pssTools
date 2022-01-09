@@ -266,170 +266,170 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules) {
   rmarkdown::render("Missingness.Rmd", output_file = paste0("Missingness - ", output_time))
 
 
-  ##### Missing data for select initial_contact_fo vars
-  initial_cont_miss_vars <- c("iden_date_mdy", "contact_dob", "reg_phone", "teacher_school_location",
-                              "teacher_school_other", "parent_school_location", "parent_school_other",
-                              "numchild_b", "randomization_child_num", "dob_child", "contact_decline_other",
-                              "contact_ineligible_other", "withdrew_reason", "exitstatus_other", "name_child1",
-                              "age_child1", "name_child2", "age_child2", "name_child3", "age_child3", "name_child4",
-                              "age_child4", "name_child5", "age_child5", "name_child6", "age_child6")
-  form_completed <- qc_cases %>% filter(redcap_event_name == "initial_contact_fo" & (!is.na(caregiver) | !is.na(school_employee) | !is.na(adult)))
-  initial_cont_data_dict <- data_dictionary %>% filter(var %in% initial_cont_miss_vars)
-  for(i in initial_cont_miss_vars) {
-    for(r in 1:nrow(form_completed)) {
-      is_missing <- is.na(form_completed[,which(colnames(form_completed) == i)])[r]
-      branching_logic_true <- ifelse(i %in% branching$var, eval(rlang::parse_expr(branching[which(branching$var == i),"branching_r"])), TRUE)
-      if(is_missing & branching_logic_true) { #if the variable is missing and branching logic is true
-        qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), form_completed$record_id[r], 1, "Initial Contact Form", i, "Missing Data", "New")
-      }
-    }
-  }
-
-  ############################### Specific Validation Rules #############################
-
-  for(i in 1:nrow(qc_rules)){
-    curr_qc_check <- qc_cases %>% filter(redcap_event_name == qc_rules$event[i])
-
-    for(r in 1:nrow(curr_qc_check)){
-      qc_condition <- eval(rlang::parse_expr(qc_rules$r_rule[i]))
-      if(qc_condition %in% TRUE) {
-        qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), curr_qc_check$record_id[r], curr_qc_check$redcap_event_name[r], qc_rules$form[i], qc_rules$variables[i], qc_rules$description[i], "New")
-      }
-    }
-
-  }
-
-
-  ############################### Field History Checks ###############################
-  #checks to ensure specific fields have only been modified by specific people
-
-  #selected for idi field
-  idi_selected_issues <- logs[which(grepl("idi_selected =", logs$List.of.Data.Changes.OR.Fields.Exported)),]
-  idi_selected_issues$record_id <- str_extract(idi_selected_issues$Action, "\\d{4}-\\d*")
-  idi_selected_issues$idi_selected_value <- str_extract(idi_selected_issues$List.of.Data.Changes.OR.Fields.Exported, "idi_selected = '[01]*'")
-  idi_selected_issues <- idi_selected_issues %>% arrange(record_id, Time...Date)
-  idi_selected_issues <- idi_selected_issues %>% mutate(prev_record_id = lag(record_id))
-
-  list_to_remove <- c()
-  for(i in 1:nrow(idi_selected_issues)){
-    #remove_cond <- (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$idi_selected_value[i] == "idi_selected = ''") | (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$Username[i] %in% c("prebman1@jh.edu", "aingall4@jh.edu"))
-    remove_cond <- (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$idi_selected_value[i] == "idi_selected = ''")
-    if(is.na(remove_cond)) {remove_cond <- FALSE}
-    if(remove_cond){
-      list_to_remove <- c(list_to_remove, i, i-1)
-    }
-  }
-  idi_selected_issues <- idi_selected_issues[-list_to_remove,]
-  idi_selected_issues <- idi_selected_issues[which(idi_selected_issues$Username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
-  idi_selected_issues <- idi_selected_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "idi_selected", description = paste0(Username, " set ", idi_selected_value, " on ", Time...Date), status = "New") %>%
-    select(date, record_id, event, form, variables, description, status)
-
-  qc_errors <- rbind(qc_errors, idi_selected_issues)
-
-  #randomization override field
-  rand_override_issues <- logs[which(grepl("randomization_override =", logs$List.of.Data.Changes.OR.Fields.Exported)),]
-  rand_override_issues$record_id <- str_extract(rand_override_issues$Action, "\\d{4}-\\d*")
-  rand_override_issues$rand_override_value <- str_extract(rand_override_issues$List.of.Data.Changes.OR.Fields.Exported, "randomization_override = '[01]*'")
-  rand_override_issues <- rand_override_issues %>% arrange(record_id, Time...Date)
-  rand_override_issues <- rand_override_issues %>% mutate(prev_record_id = lag(record_id))
-
-  list_to_remove <- c()
-  for(i in 1:nrow(rand_override_issues)){
-    #remove_cond <- (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$rand_override_value[i] == "idi_selected = ''") | (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$Username[i] %in% c("prebman1@jh.edu", "aingall4@jh.edu"))
-    remove_cond <- (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$rand_override_value[i] == "randomization_override = ''")
-    if(is.na(remove_cond)) {remove_cond <- FALSE}
-    if(remove_cond){
-      list_to_remove <- c(list_to_remove, i, i-1)
-    }
-  }
-  if(!is.null(list_to_remove)) rand_override_issues <- rand_override_issues[-list_to_remove,]
-  rand_override_issues <- rand_override_issues[which(rand_override_issues$Username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
-  rand_override_issues <- rand_override_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "randomization_override", description = paste0(Username, " set ", rand_override_value, " on ", Time...Date), status = "New") %>%
-    select(date, record_id, event, form, variables, description, status)
-
-  qc_errors <- rbind(qc_errors, rand_override_issues)
-
-  #surveys that are complete but not marked as complete in REDCap
-  #get a list of all vars but don't include initial contact form (too many unique patterns)
-  #forms determines which forms are checked for missing values
-  forms <- unique(data_dictionary$form)
-  parent_baseline_forms <- forms[8:40]
-  teacher_baseline_forms <- forms[c(8:10,12:19, 40)]
-  parent_forms_complete_vars <- paste0(parent_baseline_forms, "_complete")
-  teacher_forms_complete_vars <- paste0(teacher_baseline_forms, "_complete")
-
-  baselines <- cases %>% group_by(record_id) %>%
-    fill(role_final, .direction = "downup") %>%
-    ungroup() %>%
-    filter(redcap_event_name == "baseline_arm_1") %>%
-    mutate(
-      event_complete = case_when(
-        survey_admin_complete1 == 1 | survey_admin_complete2 == 1 | survey_admin_complete3 == 1 | survey_admin_complete4 == 1 ~ 1,
-        TRUE ~ 0))
-  incomplete_baselines <- baselines %>% filter(event_complete == 0)
-
-  incomplete_baselines$parent_forms_completed <- rowSums(ifelse(incomplete_baselines[,parent_forms_complete_vars] == 2, 1, 0))
-  incomplete_baselines$teacher_forms_completed <- rowSums(ifelse(incomplete_baselines[,teacher_forms_complete_vars] == 2, 1, 0))
-
-  completed_not_marked <- incomplete_baselines %>%
-    filter((role_final == 1 & parent_forms_completed == 33) | (role_final == 2 & teacher_forms_completed == 12)) %>%
-    select(record_id)
-
-  completed_not_marked <- completed_not_marked %>%
-    mutate(date = format(Sys.Date(), "%Y-%m-%d"),
-           event = 3, form = "survey_administration_info",
-           variables = "survey_completed",
-           description = "This event appears to be completed in REDCap, but has not been marked as completed on the survey admin info form",
-           status = "New") %>%
-    select(date, record_id, event, form, variables, description, status)
-
-  qc_errors <- rbind(qc_errors, completed_not_marked)
-
-  ###############################  Final QC Errors DF ###############################
-  qc_errors$event <- recode(qc_errors$event, '1' = levels(qc_cases$redcap_event_name)[1],
-                            '2' = levels(qc_cases$redcap_event_name)[2],
-                            '3' = levels(qc_cases$redcap_event_name)[3],
-                            '4' = levels(qc_cases$redcap_event_name)[4],
-                            '5' = levels(qc_cases$redcap_event_name)[5],
-                            '6' = levels(qc_cases$redcap_event_name)[6],
-                            '7' = levels(qc_cases$redcap_event_name)[7],
-                            '8' = levels(qc_cases$redcap_event_name)[8],
-                            '9' = levels(qc_cases$redcap_event_name)[9],
-                            '10' = levels(qc_cases$redcap_event_name)[10],
-                            '11' = levels(qc_cases$redcap_event_name)[11],
-                            '12' = levels(qc_cases$redcap_event_name)[12])
-
-  qc_errors <- qc_errors %>% mutate(data_access_group = case_when(
-    substr(record_id, 1, 4) == "5255" ~ "wmat",
-    substr(record_id, 1, 4) == "5256" ~ "shiprock",
-    substr(record_id, 1, 4) == "5257" ~ "tuba_city",
-    substr(record_id, 1, 4) == "5258" ~ "chinle"),
-    event_id = case_when(
-      event == "initial_contact_fo" ~ "41033",
-      event == "consent" ~ "41788",
-      event == "baseline" ~ "40326",
-      event == "baseline_idi_consent" ~ "42175",
-      event == "baseline_idi" ~ "42175",
-      event == "baseline_idi_child_consent" ~ "42175",
-      event == "baseline_idi_child" ~ "42175",
-      event == "wave2" ~ "40679",
-      event == "followup_idi" ~ "42176",
-      event == "wave3" ~ "40680",
-      event == "wave4" ~ "40681"),
-    redcap_form_name = case_when(
-      form == "Initial Contact Form" ~ "initial_contact_form",
-      TRUE ~ form
-    ),
-    url = paste0("HYPERLINK(\"","https://mrprcbcw.hosts.jhmi.edu/redcap/redcap_v10.6.28/DataEntry/index.php?pid=4306&arm=1&id=", record_id, "&event_id=", event_id, "&page=", redcap_form_name, "\", \"", "Click to view form", "\")")
-  ) %>% select(date, data_access_group, record_id, event, form, variables, description, status, url) %>%
-    arrange(data_access_group, record_id, event, form, date)
-
-  class(qc_errors$url) <- "formula"
-
-  #remove any participants who declined or were ineligible
-  qc_cases_inelg_decl <- which(qc_cases$redcap_event_name == "initial_contact_fo" & qc_cases$pot_participant_status %in% c(3,4))
-  qc_cases_inelg_decl <- qc_cases$record_id[qc_cases_inelg_decl]
-  qc_errors <- qc_errors %>% filter(!(record_id %in% qc_cases_inelg_decl))
+  # ##### Missing data for select initial_contact_fo vars
+  # initial_cont_miss_vars <- c("iden_date_mdy", "contact_dob", "reg_phone", "teacher_school_location",
+  #                             "teacher_school_other", "parent_school_location", "parent_school_other",
+  #                             "numchild_b", "randomization_child_num", "dob_child", "contact_decline_other",
+  #                             "contact_ineligible_other", "withdrew_reason", "exitstatus_other", "name_child1",
+  #                             "age_child1", "name_child2", "age_child2", "name_child3", "age_child3", "name_child4",
+  #                             "age_child4", "name_child5", "age_child5", "name_child6", "age_child6")
+  # form_completed <- qc_cases %>% filter(redcap_event_name == "initial_contact_fo" & (!is.na(caregiver) | !is.na(school_employee) | !is.na(adult)))
+  # initial_cont_data_dict <- data_dictionary %>% filter(var %in% initial_cont_miss_vars)
+  # for(i in initial_cont_miss_vars) {
+  #   for(r in 1:nrow(form_completed)) {
+  #     is_missing <- is.na(form_completed[,which(colnames(form_completed) == i)])[r]
+  #     branching_logic_true <- ifelse(i %in% branching$var, eval(rlang::parse_expr(branching[which(branching$var == i),"branching_r"])), TRUE)
+  #     if(is_missing & branching_logic_true) { #if the variable is missing and branching logic is true
+  #       qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), form_completed$record_id[r], 1, "Initial Contact Form", i, "Missing Data", "New")
+  #     }
+  #   }
+  # }
+  #
+  # ############################### Specific Validation Rules #############################
+  #
+  # for(i in 1:nrow(qc_rules)){
+  #   curr_qc_check <- qc_cases %>% filter(redcap_event_name == qc_rules$event[i])
+  #
+  #   for(r in 1:nrow(curr_qc_check)){
+  #     qc_condition <- eval(rlang::parse_expr(qc_rules$r_rule[i]))
+  #     if(qc_condition %in% TRUE) {
+  #       qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), curr_qc_check$record_id[r], curr_qc_check$redcap_event_name[r], qc_rules$form[i], qc_rules$variables[i], qc_rules$description[i], "New")
+  #     }
+  #   }
+  #
+  # }
+  #
+  #
+  # ############################### Field History Checks ###############################
+  # #checks to ensure specific fields have only been modified by specific people
+  #
+  # #selected for idi field
+  # idi_selected_issues <- logs[which(grepl("idi_selected =", logs$List.of.Data.Changes.OR.Fields.Exported)),]
+  # idi_selected_issues$record_id <- str_extract(idi_selected_issues$Action, "\\d{4}-\\d*")
+  # idi_selected_issues$idi_selected_value <- str_extract(idi_selected_issues$List.of.Data.Changes.OR.Fields.Exported, "idi_selected = '[01]*'")
+  # idi_selected_issues <- idi_selected_issues %>% arrange(record_id, Time...Date)
+  # idi_selected_issues <- idi_selected_issues %>% mutate(prev_record_id = lag(record_id))
+  #
+  # list_to_remove <- c()
+  # for(i in 1:nrow(idi_selected_issues)){
+  #   #remove_cond <- (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$idi_selected_value[i] == "idi_selected = ''") | (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$Username[i] %in% c("prebman1@jh.edu", "aingall4@jh.edu"))
+  #   remove_cond <- (idi_selected_issues$record_id[i] == idi_selected_issues$prev_record_id[i] & idi_selected_issues$idi_selected_value[i] == "idi_selected = ''")
+  #   if(is.na(remove_cond)) {remove_cond <- FALSE}
+  #   if(remove_cond){
+  #     list_to_remove <- c(list_to_remove, i, i-1)
+  #   }
+  # }
+  # idi_selected_issues <- idi_selected_issues[-list_to_remove,]
+  # idi_selected_issues <- idi_selected_issues[which(idi_selected_issues$Username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
+  # idi_selected_issues <- idi_selected_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "idi_selected", description = paste0(Username, " set ", idi_selected_value, " on ", Time...Date), status = "New") %>%
+  #   select(date, record_id, event, form, variables, description, status)
+  #
+  # qc_errors <- rbind(qc_errors, idi_selected_issues)
+  #
+  # #randomization override field
+  # rand_override_issues <- logs[which(grepl("randomization_override =", logs$List.of.Data.Changes.OR.Fields.Exported)),]
+  # rand_override_issues$record_id <- str_extract(rand_override_issues$Action, "\\d{4}-\\d*")
+  # rand_override_issues$rand_override_value <- str_extract(rand_override_issues$List.of.Data.Changes.OR.Fields.Exported, "randomization_override = '[01]*'")
+  # rand_override_issues <- rand_override_issues %>% arrange(record_id, Time...Date)
+  # rand_override_issues <- rand_override_issues %>% mutate(prev_record_id = lag(record_id))
+  #
+  # list_to_remove <- c()
+  # for(i in 1:nrow(rand_override_issues)){
+  #   #remove_cond <- (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$rand_override_value[i] == "idi_selected = ''") | (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$Username[i] %in% c("prebman1@jh.edu", "aingall4@jh.edu"))
+  #   remove_cond <- (rand_override_issues$record_id[i] == rand_override_issues$prev_record_id[i] & rand_override_issues$rand_override_value[i] == "randomization_override = ''")
+  #   if(is.na(remove_cond)) {remove_cond <- FALSE}
+  #   if(remove_cond){
+  #     list_to_remove <- c(list_to_remove, i, i-1)
+  #   }
+  # }
+  # if(!is.null(list_to_remove)) rand_override_issues <- rand_override_issues[-list_to_remove,]
+  # rand_override_issues <- rand_override_issues[which(rand_override_issues$Username %notin% c("prebman1@jh.edu","aingall4@jh.edu")),]
+  # rand_override_issues <- rand_override_issues %>% mutate(date = format(Sys.Date(), "%Y-%m-%d"), event = 1, form = "initial_contact_form", variables = "randomization_override", description = paste0(Username, " set ", rand_override_value, " on ", Time...Date), status = "New") %>%
+  #   select(date, record_id, event, form, variables, description, status)
+  #
+  # qc_errors <- rbind(qc_errors, rand_override_issues)
+  #
+  # #surveys that are complete but not marked as complete in REDCap
+  # #get a list of all vars but don't include initial contact form (too many unique patterns)
+  # #forms determines which forms are checked for missing values
+  # forms <- unique(data_dictionary$form)
+  # parent_baseline_forms <- forms[8:40]
+  # teacher_baseline_forms <- forms[c(8:10,12:19, 40)]
+  # parent_forms_complete_vars <- paste0(parent_baseline_forms, "_complete")
+  # teacher_forms_complete_vars <- paste0(teacher_baseline_forms, "_complete")
+  #
+  # baselines <- cases %>% group_by(record_id) %>%
+  #   fill(role_final, .direction = "downup") %>%
+  #   ungroup() %>%
+  #   filter(redcap_event_name == "baseline_arm_1") %>%
+  #   mutate(
+  #     event_complete = case_when(
+  #       survey_admin_complete1 == 1 | survey_admin_complete2 == 1 | survey_admin_complete3 == 1 | survey_admin_complete4 == 1 ~ 1,
+  #       TRUE ~ 0))
+  # incomplete_baselines <- baselines %>% filter(event_complete == 0)
+  #
+  # incomplete_baselines$parent_forms_completed <- rowSums(ifelse(incomplete_baselines[,parent_forms_complete_vars] == 2, 1, 0))
+  # incomplete_baselines$teacher_forms_completed <- rowSums(ifelse(incomplete_baselines[,teacher_forms_complete_vars] == 2, 1, 0))
+  #
+  # completed_not_marked <- incomplete_baselines %>%
+  #   filter((role_final == 1 & parent_forms_completed == 33) | (role_final == 2 & teacher_forms_completed == 12)) %>%
+  #   select(record_id)
+  #
+  # completed_not_marked <- completed_not_marked %>%
+  #   mutate(date = format(Sys.Date(), "%Y-%m-%d"),
+  #          event = 3, form = "survey_administration_info",
+  #          variables = "survey_completed",
+  #          description = "This event appears to be completed in REDCap, but has not been marked as completed on the survey admin info form",
+  #          status = "New") %>%
+  #   select(date, record_id, event, form, variables, description, status)
+  #
+  # qc_errors <- rbind(qc_errors, completed_not_marked)
+  #
+  # ###############################  Final QC Errors DF ###############################
+  # qc_errors$event <- recode(qc_errors$event, '1' = levels(qc_cases$redcap_event_name)[1],
+  #                           '2' = levels(qc_cases$redcap_event_name)[2],
+  #                           '3' = levels(qc_cases$redcap_event_name)[3],
+  #                           '4' = levels(qc_cases$redcap_event_name)[4],
+  #                           '5' = levels(qc_cases$redcap_event_name)[5],
+  #                           '6' = levels(qc_cases$redcap_event_name)[6],
+  #                           '7' = levels(qc_cases$redcap_event_name)[7],
+  #                           '8' = levels(qc_cases$redcap_event_name)[8],
+  #                           '9' = levels(qc_cases$redcap_event_name)[9],
+  #                           '10' = levels(qc_cases$redcap_event_name)[10],
+  #                           '11' = levels(qc_cases$redcap_event_name)[11],
+  #                           '12' = levels(qc_cases$redcap_event_name)[12])
+  #
+  # qc_errors <- qc_errors %>% mutate(data_access_group = case_when(
+  #   substr(record_id, 1, 4) == "5255" ~ "wmat",
+  #   substr(record_id, 1, 4) == "5256" ~ "shiprock",
+  #   substr(record_id, 1, 4) == "5257" ~ "tuba_city",
+  #   substr(record_id, 1, 4) == "5258" ~ "chinle"),
+  #   event_id = case_when(
+  #     event == "initial_contact_fo" ~ "41033",
+  #     event == "consent" ~ "41788",
+  #     event == "baseline" ~ "40326",
+  #     event == "baseline_idi_consent" ~ "42175",
+  #     event == "baseline_idi" ~ "42175",
+  #     event == "baseline_idi_child_consent" ~ "42175",
+  #     event == "baseline_idi_child" ~ "42175",
+  #     event == "wave2" ~ "40679",
+  #     event == "followup_idi" ~ "42176",
+  #     event == "wave3" ~ "40680",
+  #     event == "wave4" ~ "40681"),
+  #   redcap_form_name = case_when(
+  #     form == "Initial Contact Form" ~ "initial_contact_form",
+  #     TRUE ~ form
+  #   ),
+  #   url = paste0("HYPERLINK(\"","https://mrprcbcw.hosts.jhmi.edu/redcap/redcap_v10.6.28/DataEntry/index.php?pid=4306&arm=1&id=", record_id, "&event_id=", event_id, "&page=", redcap_form_name, "\", \"", "Click to view form", "\")")
+  # ) %>% select(date, data_access_group, record_id, event, form, variables, description, status, url) %>%
+  #   arrange(data_access_group, record_id, event, form, date)
+  #
+  # class(qc_errors$url) <- "formula"
+  #
+  # #remove any participants who declined or were ineligible
+  # qc_cases_inelg_decl <- which(qc_cases$redcap_event_name == "initial_contact_fo" & qc_cases$pot_participant_status %in% c(3,4))
+  # qc_cases_inelg_decl <- qc_cases$record_id[qc_cases_inelg_decl]
+  # qc_errors <- qc_errors %>% filter(!(record_id %in% qc_cases_inelg_decl))
 
 
   # options(gargle_oauth_cache = "Authorization Credentials",
