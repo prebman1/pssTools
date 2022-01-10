@@ -12,6 +12,9 @@
 #' gs_url <- "https://docs.google.com/spreadsheets/d/1UrjMWWrgS1n2osDYxLDfFv2Xf_bmXXg69k5ubAXRB5g/edit#gid=0"
 #' qc_errors_final <- pss_qc_ggl_shts(qc_errors, gs_url)
 pss_qc_ggl_shts <- function(qc_errors, gs_url) {
+  #define notin function
+  `%notin%` <- Negate(`%in%`)
+
   sheets <- sheet_names(gs_url)
   qc_errors_list <- list()
   for(sheet in sheets){
