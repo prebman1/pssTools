@@ -27,7 +27,9 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules, form_mapping, write_f
   #################################### Clean REDCap Data #########################################
   #create new df to maintain cases (original REDCap data) if needed later
   qc_cases <- cases
+
   #Set Event name as a factor
+  redcap_events <- c("initial_contact_fo_arm_1", "consent_arm_1", "baseline_arm_1","baseline_idi_consent_arm_1", "baseline_idi_arm_1","baseline_idi_child_consent_arm_1", "baseline_idi_child_arm_1", "wave2_arm_1", "followup_idi_arm_1","followup_idi_child_arm_1", "wave3_arm_1", "wave4_arm_1")
   qc_cases$redcap_event_name <- factor(qc_cases$redcap_event_name, levels = redcap_events, labels = gsub("_arm_1", "", redcap_events))
 
   #create a variable for redcap events w/o 'arm_1' at end
