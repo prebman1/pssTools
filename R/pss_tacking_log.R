@@ -83,7 +83,7 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
   tracking_log <- tracking_log %>% mutate(recruitment_complete = ifelse(
     eligible == 1 & !is.na(role_final) & (role_final == "Teacher/Staff" | (role_final == "Parent/Caregiver" & !is.na(randomization_child_num))), 1, 0
   )) #sets 1 for recruitment complete; 0 to all other records
-  tracking_log$recruitment_complete[which(tracking_log$redcap_event_name != "initial_contact_fo_arm_1")] <- NA #change 0 to NA for any non-initial contact form events; this is so that you can fill them later
+  tracking_log$recruitment_complete[which(tracking_log$redcap_event_name != "initial_contact_fo_arm_1")] <- NA #change 0 to NA for any non-initial contact form events; this is so that you can fill them later based on carrying forward the initial contact recruitment complete
 
   #remove missing data_access_group records (test records)
   tracking_log <- filter(tracking_log, !is.na(data_access_group))
@@ -113,7 +113,7 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
     ) %>%
     ungroup() %>%
     #rename initial contact and baseline dates
-    rename(initial_contact_date = iden_date_mdy,
+    mutate(initial_contact_date = iden_date_mdy,
            baseline_date = date_baseline_demo) %>%
     mutate(
       #remove _arm_1 from event names for easier coding
@@ -178,9 +178,8 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
         redcap_event_name == 'baseline_idi_child_consent' ~ baseline_date,
         redcap_event_name == 'baseline_idi_child' ~ baseline_date,
         redcap_event_name == 'wave2' ~ baseline_date + 365*.5,
-        redcap_event_name == 'wave2' ~ baseline_date + 365*.5,
-        redcap_event_name == 'followup_idi' & role_final == "Parent/Caregiver" ~ baseline_date + 365*.5,
-        redcap_event_name == 'followup_idi_child' & role_final == "Teacher/Staff" ~ baseline_date + 365*.25,
+        redcap_event_name == 'followup_idi' ~ baseline_date + 365*.5,
+        redcap_event_name == 'followup_idi_child' ~ baseline_date + 365*.5,
         redcap_event_name == 'wave3' ~ baseline_date + 365,
         redcap_event_name == 'wave4' ~ baseline_date + 365 *1.5
       ),
@@ -192,7 +191,8 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
         redcap_event_name %in% c('wave2', 'followup_idi', 'followup_idi_child', 'wave3', 'wave4') ~ event_due_date + 28,
         redcap_event_name %in% c('baseline', 'baseline_idi', 'baseline_idi_child', 'baseline_idi_consent', 'baseline_idi_child_consent') ~ event_due_date + 28,
         redcap_event_name == 'consent' ~ event_due_date + 14
-      )
+      ),
+      days_after_window_start = Sys.Date() - event_window_start
     )
 
   #labels, factors, and values for demographic variables
