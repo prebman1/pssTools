@@ -22,11 +22,11 @@ pss_case_list <- function(tracking_log, report_date = Sys.Date()){
     filter(!(role_final == "Teacher/Staff" & redcap_event_name %in% c("baseline_idi_child_consent","baseline_idi_child", "followup_idi_child")))
 
   case_list <- case_list %>%
-    #filter out idi's for parents who are not yet selected
+    #filter out idi's for parents who are not selected for idis
     filter(!(role_final == "Parent/Caregiver" & idi_selected != 1 & redcap_event_name %in% c("baseline_idi_consent", "baseline_idi", "baseline_idi_child_consent","baseline_idi_child","followup_idi", "followup_idi_child")))
 
   case_list <- case_list %>%
-    #filter out idi's for teachers/staff who are not yet selected
+    #filter out idi's for teachers/staff who are not selected for idis
     filter(!(role_final == "Teacher/Staff" & idi_selected != 1 & redcap_event_name %in% c("baseline_idi_consent", "baseline_idi", "followup_idi")))
 
   #remove any further idi's or idi consents if adult idi consent is not completed
@@ -49,13 +49,17 @@ pss_case_list <- function(tracking_log, report_date = Sys.Date()){
   #recode missing role final to unknown
   case_list$role_final[which(is.na(case_list$role_final))] <- "Role Unknown"
 
-  tracking_log_temp <- case_list %>% select(record_id, redcap_event_name, initial_contact_date, eligible, role_final, randomization_child_num, pot_participant_status, exitstatus, idi_selected, event_complete, event_due_date, event_window_start, recruitment_complete)
+  #remove all events if exit status notes as  lost to follow-up, withdrew from study after baseline, declined before baseline was done or other
+  case_list <- case_list %>%
+    filter(!(exitstatus %in% c(2,3,5,6)))
 
+  #find the record ids for participants that are currently doing hybrid or online learning. These will get marked on the case lists.
   virtual_idis <- case_list %>%
     filter(redcap_event_name == "initial_contact_fo",
            (parent_schooltypescurr == "Online/virtual learning (only learning online)" | parent_schooltypescurr == "Hybrid (split between learning online and in-person)" | teacherrole == "Online/virtual learning (only teaching/working online)" | parent_schooltypescurr == "Hybrid (split between teaching/working online and in-person)"))
   virtual_idis <- virtual_idis$record_id
 
+  #get the current case_list (remove events that are not completed or not due yet, create case_list_flag and follow_up_break variables)
   case_list <- case_list %>% filter(
     !is.na(event_due_date),
     event_complete == 0,
