@@ -14,6 +14,16 @@
 #' cases <- redcap_read(redcap_uri = url, "token"=token, events = redcap_events)$data
 #' qc <- pss_qc(cases)
 pss_qc <- function(cases, logs, data_dictionary, qc_rules, form_mapping, write_files = FALSE) {
+
+  #start by creating a temporary tracking log df that will be used to remove participants that have withdraw or declined
+  tmp_tracking_log <- pss_tracking_log(cases)
+
+  decline_ineligible <- tmp_tracking_log %>% filter(pot_participant_status %in% c("Decline", "Ineligible"))
+
+  decline_ineligible <- decline_ineligible$record_id
+
+  #decline_ineligible <- tmp_tracking_log %>% filter(!(pot_participant_status %in% c("Decline", "Ineligible") | exitstatus %in% c(2, 3, 5, 6)))
+
   #define notin function
   `%notin%` <- Negate(`%in%`)
 
@@ -395,6 +405,10 @@ pss_qc <- function(cases, logs, data_dictionary, qc_rules, form_mapping, write_f
     select(date, record_id, event, form, variables, description, status)
 
   qc_errors <- rbind(qc_errors, completed_not_marked)
+
+  #remove qc errors for participants who's status is decline or ineligible
+
+  qc_errors <- qc_errors %>% filter(!(record_id %in% decline_ineligible))
 
   ###############################  Final QC Errors DF ###############################
   qc_errors$event <- recode(qc_errors$event, '1' = levels(qc_cases$redcap_event_name)[1],
