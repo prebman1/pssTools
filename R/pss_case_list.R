@@ -15,7 +15,8 @@ pss_case_list <- function(tracking_log, report_date = Sys.Date()){
 
   case_list <- case_list %>%
     #filter out records where participant was ineligible or declined
-    filter(!(pot_participant_status %in% c("Decline", "Ineligible") | exitstatus %in% c(2, 3, 5)))
+    #remove all events if exit status is lost to follow-up, withdrew from study after baseline, declined before baseline was done or other
+    filter(!(pot_participant_status %in% c("Decline", "Ineligible") | exitstatus %in% c(2, 3, 5, 6)))
 
   case_list <- case_list %>%
     #filter out child idi's for teachers
@@ -48,10 +49,6 @@ pss_case_list <- function(tracking_log, report_date = Sys.Date()){
 
   #recode missing role final to unknown
   case_list$role_final[which(is.na(case_list$role_final))] <- "Role Unknown"
-
-  #remove all events if exit status notes as  lost to follow-up, withdrew from study after baseline, declined before baseline was done or other
-  case_list <- case_list %>%
-    filter(!(exitstatus %in% c(2,3,5,6)))
 
   #find the record ids for participants that are currently doing hybrid or online learning. These will get marked on the case lists.
   virtual_idis <- case_list %>%
