@@ -4,7 +4,14 @@
 \alias{pss_qc}
 \title{Create QC List}
 \usage{
-pss_qc(cases, logs, data_dictionary, qc_rules, write_files = FALSE)
+pss_qc(
+  cases,
+  logs,
+  data_dictionary,
+  qc_rules,
+  form_mapping,
+  write_files = FALSE
+)
 }
 \arguments{
 \item{cases}{A data frame with output from redcap_read function for PSS.}
@@ -14,6 +21,8 @@ pss_qc(cases, logs, data_dictionary, qc_rules, write_files = FALSE)
 \item{data_dictionary}{A data frame with the current data dictionary to look for missingness.}
 
 \item{qc_rules}{A data frame with the project specific qc_rules.}
+
+\item{form_mapping}{A data frame that has all the form mapping done.}
 
 \item{write_files}{Logical. Determines if csv files and Rmd files are created or not.}
 }
