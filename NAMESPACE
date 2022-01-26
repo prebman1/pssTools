@@ -2,6 +2,7 @@
 
 export(pss_case_list)
 export(pss_draw_consort)
+export(pss_missingness)
 export(pss_qc)
 export(pss_qc_ggl_shts)
 export(pss_tracking_log)
