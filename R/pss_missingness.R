@@ -222,10 +222,10 @@ pss_missingness <- function(cases, data_dictionary, form_mapping, missingness_ty
 
 
 
-  part_miss_forms <- forms[which(!(forms %in% c("informed_consent", "idi_informed_consent", "idi_parental_permission", "idi_youth_assent", "idi_tracking")))]
+  part_miss_forms <- forms[which(!(forms %in% c("informed_consent", "idi_informed_consent", "idi_parental_permission", "idi_youth_assent", "idi_tracking", "idi_tracking_child")))]
   participant_missingness <- data.frame(matrix(nrow = 0, ncol = 3 + length(part_miss_forms)))
   colnames(participant_missingness) <- c("record_id","role_final", "redcap_event_name", part_miss_forms)
-  part_miss_form_vars <- forms_complete_vars[which(!(forms %in% c("informed_consent", "idi_informed_consent", "idi_parental_permission", "idi_youth_assent", "idi_tracking")))]
+  part_miss_form_vars <- forms_complete_vars[which(!(forms %in% c("informed_consent", "idi_informed_consent", "idi_parental_permission", "idi_youth_assent", "idi_tracking", "idi_tracking_child")))]
 
   for(c in 1:nrow(qc_cases)){
     current_case <- qc_cases[c,] #select 1 record at time
