@@ -200,7 +200,7 @@ pss_missingness <- function(cases, data_dictionary, form_mapping, missingness_ty
             num_expected <- num_expected + 1
           }
           if(is_missing & branching_logic_true) { #if the variable is missing and i
-            qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), form_completed$record_id[r], form_completed$redcap_event_name[r], form_name, i, "Missing Data", "New")
+            #qc_errors[nrow(qc_errors) + 1,] <- c(format(Sys.Date(), "%Y-%m-%d"), form_completed$record_id[r], form_completed$redcap_event_name[r], form_name, i, "Missing Data", "New")
             num_missing <- num_missing + 1
           }
         }
