@@ -91,7 +91,7 @@ pss_case_list <- function(tracking_log, report_date = Sys.Date()){
       TRUE ~ 0),
     days_since_window = Sys.Date() - event_window_start
   ) %>%
-    select(record_id, role_final, redcap_event_name, data_access_group, event_complete, event_due_date, event_window_start, event_window_end, besttime, notes, case_list_flag, site_call_flag, followup_break)
+    select(record_id, role_final, redcap_event_name, data_access_group, event_complete, event_due_date, event_window_start, event_window_end, days_since_window, besttime, notes, case_list_flag, site_call_flag, followup_break)
 
   ### final changes to case list formatting
   #add * for virtual records
