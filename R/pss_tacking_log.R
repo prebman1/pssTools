@@ -195,6 +195,11 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
       days_after_window_start = Sys.Date() - event_window_start
     )
 
+  #add list of when each event is complete to each event so you can reference across events
+  event_complete_df <- tracking_log %>% select(record_id, redcap_event_name, event_complete, event_complete_date) %>% pivot_wider(names_from = redcap_event_name, values_from = c(event_complete, event_complete_date))
+
+  tracking_log <- merge(tracking_log, event_complete_df, by = "record_id", all.x = TRUE)
+
   #labels, factors, and values for demographic variables
   #combine parent school type and teacher school type
   tracking_log <- tracking_log %>% mutate(school_type = case_when(
