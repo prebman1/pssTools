@@ -86,7 +86,7 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
   tracking_log$recruitment_complete[which(tracking_log$redcap_event_name != "initial_contact_fo_arm_1")] <- NA #change 0 to NA for any non-initial contact form events; this is so that you can fill them later based on carrying forward the initial contact recruitment complete
 
   #remove missing data_access_group records (test records)
-  tracking_log <- filter(tracking_log, !is.na(data_access_group))
+  tracking_log <- filter(tracking_log, !is.na(data_access_group) | record_id == "5256-18")
   #remove child idis for 5257-1; was selected for IDI by staff but child is not eligible
   tracking_log <- filter(tracking_log, !(record_id == "5257-1" & redcap_event_name %in% c("baseline_idi_child_consent_arm_1", "baseline_idi_child_arm_1", "followup_idi_child_arm_1")))
 
