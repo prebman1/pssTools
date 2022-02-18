@@ -31,8 +31,11 @@ pss_case_list <- function(tracking_log, report_date = Sys.Date()){
     filter(!(role_final == "Teacher/Staff" & idi_selected != 1 & redcap_event_name %in% c("baseline_idi_consent", "baseline_idi", "followup_idi")))
 
   #remove any further idi's or idi consents if adult idi consent is not completed
+  #case_list <- case_list %>%
+  #  filter(!(!(consent_idi %in% "1") & redcap_event_name %in% c("baseline_idi_consent", "baseline_idi", "followup_idi", "baseline_idi_child_consent","baseline_idi_child", "followup_idi_child")))
+  #updated line above to remove all IDIs at Allie's request as of 2/18/22
   case_list <- case_list %>%
-    filter(!(!(consent_idi %in% "1") & redcap_event_name %in% c("baseline_idi_consent", "baseline_idi", "followup_idi", "baseline_idi_child_consent","baseline_idi_child", "followup_idi_child")))
+    filter(!(redcap_event_name %in% c("baseline_idi_consent", "baseline_idi", "followup_idi", "baseline_idi_child_consent","baseline_idi_child", "followup_idi_child")))
 
   declined_idi <- length(which(case_list$pot_participant_status_idi == "Decline" & case_list$redcap_event_name == "initial_contact_fo"))
 
