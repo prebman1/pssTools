@@ -107,9 +107,12 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
       besttime,
       recruitment_complete,
       all_of(demo_vars),
+      .direction = "downup"
+    ) %>%
+    fill(
       all_of(school_enroll_vars),
       all_of(access_service_vars),
-      .direction = "downup"
+      .direction = "up"
     ) %>%
     ungroup() %>%
     #rename initial contact and baseline dates
@@ -411,6 +414,7 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
                                                                                      "Not enough to make ends meet"))
   label(tracking_log$money) <- "At end of month, household ended up with:"
   label(tracking_log$randomization_child_age) <- "Index Child's Age"
+
 
   return(tracking_log)
 }
