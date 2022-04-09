@@ -49,6 +49,10 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
     substr(record_id, 1, 4) == "5256" ~ "shiprock",
     substr(record_id, 1, 4) == "5257" ~ "tuba_city",
     substr(record_id, 1, 4) == "5258" ~ "chinle",
+  ),
+  tribe = case_when(
+    substr(record_id, 1, 4) %in% c("5255") ~ "WMAT",
+    substr(record_id, 1, 4) %in% c("5256", "5257", "5258") ~ "Navajo"
   ))
 
   #add in a date for any initial contact forms that are missing a date; arrange by DAG, then redcap_event_name, create previous_record_date variable
