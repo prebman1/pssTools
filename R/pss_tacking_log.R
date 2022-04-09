@@ -167,6 +167,12 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
       ),
       week = floor_date(event_complete_date, unit = "week", week_start = week_start_day),
       month = floor_date(event_complete_date, unit = "month"),
+      event_complete_week = floor_date(event_complete_date, unit = "week", week_start = week_start_day),
+      event_complete_month = month(event_complete_date),
+      event_complete_yr_month = format(event_complete_date, "%Y-%m"),
+      event_complete_qtr = quarter(event_complete_date),
+      event_complete_year = year(event_complete_date),
+      event_complete_yr_qtr = paste0(event_complete_year, ", ", event_complete_qtr),
       notes = "")
 
   #add in due dates & windows
