@@ -216,9 +216,9 @@ pss_tracking_log <- function(cases, week_start_day = 5) {
   tracking_log <- merge(tracking_log, event_complete_df, by = "record_id", all.x = TRUE)
 
   #add in follow-up due dates for participants who consented but did not complete baseline
-  tracking_log$event_due_date[tracking_log$redcap_event_name == "wave2" & is.na(tracking_log$event_due_date) & event_complete_consent == 1] <- as.Date("2022-04-15") + 365*.5
-  tracking_log$event_due_date[tracking_log$redcap_event_name == "wave3" & is.na(tracking_log$event_due_date) & event_complete_consent == 1] <- as.Date("2022-04-15") + 365
-  tracking_log$event_due_date[tracking_log$redcap_event_name == "wave4" & is.na(tracking_log$event_due_date) & event_complete_consent == 1] <- as.Date("2022-04-15") + 365*1.5
+  tracking_log$event_due_date[tracking_log$redcap_event_name == "wave2" & is.na(tracking_log$event_due_date) & tracking_log$event_complete_consent == 1] <- as.Date("2022-04-15") + 365*.5
+  tracking_log$event_due_date[tracking_log$redcap_event_name == "wave3" & is.na(tracking_log$event_due_date) & tracking_log$event_complete_consent == 1] <- as.Date("2022-04-15") + 365
+  tracking_log$event_due_date[tracking_log$redcap_event_name == "wave4" & is.na(tracking_log$event_due_date) & tracking_log$event_complete_consent == 1] <- as.Date("2022-04-15") + 365*1.5
 
   #labels, factors, and values for demographic variables
   #combine parent school type and teacher school type
