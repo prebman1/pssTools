@@ -37,6 +37,10 @@ pss_case_list <- function(tracking_log, report_date = Sys.Date()){
   case_list <- case_list %>%
     filter(!(redcap_event_name %in% c("baseline_idi_consent", "baseline_idi", "followup_idi", "baseline_idi_child_consent","baseline_idi_child", "followup_idi_child")))
 
+  #remove all remaining consent and baseline participants per Allie/Emily's request on 5/14/22
+  case_list <- case_list %>%
+    filter(!(redcap_event_name %in% c("baseline", "consent")))
+
   declined_idi <- length(which(case_list$pot_participant_status_idi == "Decline" & case_list$redcap_event_name == "initial_contact_fo"))
 
   case_list <- case_list %>%
